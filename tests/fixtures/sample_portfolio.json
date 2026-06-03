@@ -1,0 +1,21 @@
+{
+  "base_currency": "PLN",
+  "as_of": "2026-06-03",
+  "cash_pln": 5000,
+  "positions": [
+    {
+      "isin": "IE00BK5BQT80",
+      "value_pln": 45000,
+      "label": "VWCE"
+    },
+    {
+      "isin": "IE00B4L5Y983",
+      "value_pln": 30000,
+      "label": "IWDA"
+    }
+  ],
+  "target": [
+    { "isin": "IE00BK5BQT80", "weight": 0.60 },
+    { "isin": "IE00B4L5Y983", "weight": 0.40 }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Driftless portfolio snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["base_currency", "cash_pln", "positions", "target"],
+  "properties": {
+    "base_currency": {
+      "type": "string",
+      "enum": ["PLN"]
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "cash_pln": {
+      "type": "number",
+      "minimum": 0
+    },
+    "positions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/position" }
+    },
+    "target": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/target" }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isin", "value_pln"],
+      "properties": {
+        "isin": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}[A-Z0-9]{9}[0-9]$"
+        },
+        "value_pln": {
+          "type": "number",
+          "minimum": 0
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isin", "weight"],
+      "properties": {
+        "isin": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}[A-Z0-9]{9}[0-9]$"
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}
