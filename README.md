@@ -3,7 +3,7 @@
 **Buy-only UCITS rebalancer for Polish investors.**  
 Snapshot in → concrete PLN buy orders out. No sells, no tax engine, no broker API.
 
-Python **3.14+** · MIT · open source
+Python **3.10+** (developed/tested on 3.14) · MIT · open source
 
 ---
 
@@ -32,7 +32,7 @@ Masz koszyk ETF-ów UCITS, docelową alokację i środki na koncie (albo śwież
 
 ```bash
 git clone <repo-url> driftless && cd driftless
-python3.14 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .
 ```
@@ -46,7 +46,7 @@ pytest
 
 ### Dla osoby, która nie zna Pythona
 
-Wymagana jest jednorazowa instalacja Pythona 3.14 i wpisanie kilku komend w terminalu (sekcja „Instalacja” powyżej). Sam plik konfiguracyjny jest już maksymalnie prosty — to jeden czytelny JSON, a `driftless init` generuje gotowy szablon do edycji w zwykłym edytorze tekstu.
+Wymagana jest jednorazowa instalacja Pythona (3.10+) i wpisanie kilku komend w terminalu (sekcja „Instalacja” powyżej). Sam plik konfiguracyjny jest już maksymalnie prosty — to jeden czytelny JSON, a `driftless init` generuje gotowy szablon do edycji w zwykłym edytorze tekstu.
 
 Jeśli komfortowe wpisywanie komend w terminalu jest barierą, najwygodniejsze opcje to:
 
@@ -164,7 +164,7 @@ You hold a UCITS ETF basket, a target allocation, and cash on account (or a fres
 ### Install & run
 
 ```bash
-python3.14 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 driftless plan examples/portfolio.example.json
 driftless validate examples/portfolio.example.json
