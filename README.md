@@ -1,82 +1,85 @@
 # Driftless
 
-**Buy-only UCITS rebalancer for Polish investors.**  
-Snapshot in → concrete PLN buy orders out. No sells, no tax engine, no broker API.
+**Buy-only UCITS portfolio rebalancer for Polish investors.**  
+Snapshot in → concrete PLN buy orders out. No sells, no tax engine, no broker API integration.
 
-Python **3.10+** (developed/tested on 3.14) · MIT · open source
+Python **3.10+** (developed and tested on 3.14) · MIT · Open Source
 
 ---
 
-## Po polsku
+## Why use Driftless?
 
-### Po co to jest
+If you hold a basket of UCITS ETFs, a target allocation, and have some cash on your account (or a fresh deposit), calculating exactly how much of each ETF to buy (e.g., VWCE vs. IWDA) can be tedious. Selling overweight assets is often not an option due to transaction costs, capital gains taxes, or a strict "buy-only" strategy.
 
-Masz koszyk ETF-ów UCITS, docelową alokację i środki na koncie (albo świeżą wpłatę). Ręcznie liczenie „ile kupić VWCE, ile IWDA” przy każdym dokupieniu jest żmudne — a sprzedaż overweightu często nie wchodzi w grę (koszty, podatki, zwyczaj „tylko dokupuję”).
+**Driftless** reads your current portfolio snapshot from a single JSON file and outputs **precise buy orders in PLN** per ISIN to bring you as close as possible to your target allocation — solely through purchasing underweight assets, without triggering any sell orders.
 
-**Driftless** bierze aktualny stan portfela z jednego pliku JSON i zwraca **konkretne kwoty kupna w PLN** per ISIN, żeby zbliżyć się do targetu — wyłącznie przez kupno, bez zleceń sprzedaży.
+---
 
-### Typowy workflow
+## Typical Workflow
 
-1. W aplikacji brokera skopiuj wartości pozycji (w PLN lub przelicz je sam).
-2. Wpisz wolny cash na koncie.
-3. Uzupełnij `portfolio.json` (szablon: `examples/portfolio.example.json`).
-4. Uruchom:
-
+1. Open your broker app and copy the current value of your positions (already converted to or held in PLN).
+2. Copy your free cash balance.
+3. Fill out or update your `portfolio.json` (use `driftless init` to generate a starter template).
+4. Run:
    ```bash
    driftless plan portfolio.json
    ```
+5. Manually place the calculated buy orders at your broker.
 
-5. Złóż zlecenia kupna ręcznie u brokera.
+---
 
-### Instalacja
+## Quick Start
+
+### Installation
 
 ```bash
-git clone <repo-url> driftless && cd driftless
+git clone https://github.com/yourusername/driftless.git && cd driftless
 python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # On Windows use: .venv\Scripts\activate
 pip install -e .
 ```
 
-Opcjonalnie z testami:
-
+To run with development and testing dependencies:
 ```bash
 pip install -e ".[dev]"
 pytest
 ```
 
-### Dla osoby, która nie zna Pythona
+### No Python Experience?
 
-Wymagana jest jednorazowa instalacja Pythona (3.10+) i wpisanie kilku komend w terminalu (sekcja „Instalacja” powyżej). Sam plik konfiguracyjny jest już maksymalnie prosty — to jeden czytelny JSON, a `driftless init` generuje gotowy szablon do edycji w zwykłym edytorze tekstu.
+Driftless requires a one-time Python (3.10+) installation and typing a few commands in your terminal. The configuration itself is a clean, easy-to-edit JSON file.
 
-Jeśli komfortowe wpisywanie komend w terminalu jest barierą, najwygodniejsze opcje to:
+If using a terminal is a barrier, consider these simpler deployment options:
+* **pipx** — Install globally without managing a virtual environment manually:
+  ```bash
+  pipx install driftless
+  driftless plan portfolio.json
+  ```
+* **Stand-alone Executable** *(Planned)* — A single binary executable (via PyInstaller) that runs without Python installed at all.
 
-- **pipx** — instalacja jedną komendą bez ręcznego venv: `pipx install driftless`, potem po prostu `driftless plan portfolio.json` z dowolnego katalogu.
-- **gotowy plik wykonywalny** (planowane) — pojedynczy binarny plik (PyInstaller), bez instalowania Pythona; uruchamiany podwójnym kliknięciem / z terminala.
+---
 
-Czego raczej nie da się uprościć bez zmiany charakteru narzędzia: to jest CLI, więc minimum to otwarcie terminala i podanie ścieżki do pliku. GUI/web to osobny, większy projekt.
+## Commands
 
-### Komendy
-
-| Komenda | Opis |
+| Command | Description |
 |---|---|
-| `driftless init [plik]` | Tworzy gotowy do edycji `portfolio.json` (domyślnie w bieżącym katalogu) |
-| `driftless plan <plik.json>` | Liczy plan kupna i drukuje tabelę |
-| `driftless plan <plik> --json` | Ten sam wynik w JSON (skrypty, notatki) |
-| `driftless validate <plik>` | Tylko walidacja schematu i reguł biznesowych |
+| `driftless init [file]` | Creates a ready-to-edit `portfolio.json` (defaults to the current directory) |
+| `driftless plan <file.json>` | Calculates the purchase plan and prints a formatted terminal table |
+| `driftless plan <file.json> --json` | Outputs the plan as machine-readable JSON (useful for scripts/logging) |
+| `driftless validate <file.json>` | Performs schema and business rule validation only |
 
-Kody wyjścia: `0` = OK, `1` = błąd zawartości pliku (zły JSON / schemat / wagi), `2` = problem z plikiem (brak/nieczytelny) lub złe użycie. Błędy są drukowane jako jedna czytelna linia na `stderr` — bez pythonowego tracebacku.
+### Exit Codes
+* `0` — Success / OK
+* `1` — File validation error (invalid JSON, schema violation, or target weights do not sum to 1.0)
+* `2` — Usage error (missing file, unreadable file, or invalid CLI parameters)
 
-### Najszybszy start
+Errors are printed as a single, clean line on `stderr` without exposing a Python traceback.
 
-```bash
-driftless init            # tworzy portfolio.json z przykładem
-# edytuj portfolio.json w dowolnym edytorze
-driftless plan portfolio.json
-```
+---
 
-### Format pliku portfela
+## Portfolio File Format
 
-Jeden plik JSON — **pełny snapshot**: pozycje + wolny cash = cały portfel w momencie `as_of`.
+Your portfolio file is a **full snapshot** representing your positions and free cash at a given point in time (`as_of`).
 
 ```json
 {
@@ -94,97 +97,87 @@ Jeden plik JSON — **pełny snapshot**: pozycje + wolny cash = cały portfel w 
 }
 ```
 
-| Pole | Wymagane | Znaczenie |
+### Field Specification
+
+| Field | Required | Description |
 |---|---|---|
-| `base_currency` | tak | W v1 tylko `"PLN"` |
-| `as_of` | nie | Data snapshotu (audyt: „te liczby z tego dnia”) |
-| `cash_pln` | tak | Cały wolny gotówkowy saldo na koncie (≥ 0) |
-| `positions[].isin` | tak | ISIN UCITS (12 znaków, wielkie litery) |
-| `positions[].value_pln` | tak | Aktualna wartość pozycji w PLN |
-| `positions[].label` | nie | Ticker / nazwa do tabeli (np. `VWCE`) |
-| `target[].isin` | tak | ISIN z targetu; brak w `positions` = 0 PLN |
-| `target[].weight` | tak | Udział docelowy; **suma wag = 1.0** |
+| `base_currency` | Yes | Must be `"PLN"` in v1. |
+| `as_of` | No | ISO date string for audit purposes. |
+| `cash_pln` | Yes | Your total free cash balance on the brokerage account (must be `≥ 0`). |
+| `positions[].isin` | Yes | UCITS ISIN (12 uppercase alphanumeric characters). |
+| `positions[].value_pln`| Yes | Current market value of the position in PLN. |
+| `positions[].label` | No | Short ticker or custom label (e.g. `"VWCE"`) to display in tables. |
+| `target[].isin` | Yes | Target asset ISIN. If missing from `positions`, it is treated as having `value_pln: 0`. |
+| `target[].weight` | Yes | Target allocation weight decimal (between `0` and `1`). **All weights must sum to 1.0.** |
 
-**FX:** W v1 wszystkie kwoty podajesz już w PLN (np. po kursie brokera). Narzędzie nie pobiera kursów NBP — to świadoma prostota; helper FX planowany na później.
+> **FX Note:** All position values must be supplied in PLN. The tool does not automatically fetch live exchange rates (keeping the codebase offline-first and simple); an NBP FX exchange rate helper is planned for future versions.
 
-### Jak liczy plan (buy-only)
+---
 
-```
-total     = suma(value_pln pozycji) + cash_pln
-target[i] = total × waga[i]
-gap[i]    = target[i] − current[i]
-buy[i]    = max(0, gap[i])                    # tylko niedoważenie
-```
+## How it Calculates the Plan (Buy-Only)
 
-Jeśli suma `buy` > `cash_pln`, zlecenia są **proporcjonalnie skalowane** w dół. Nadwyżka cash zostaje jako `leftover_cash` w outputcie.
+1. **Calculate Total Assets:**
+   ```
+   total = sum(position.value_pln) + cash_pln
+   ```
+2. **Calculate Target Value per ISIN:**
+   ```
+   target_value[isin] = total × weight
+   ```
+3. **Determine Allocation Gap:**
+   ```
+   gap[isin] = target_value[isin] - current_value[isin]
+   buy_raw[isin] = max(0, gap[isin])
+   ```
+4. **Scale to Available Cash:**  
+   If the sum of all raw buy orders exceeds `cash_pln`, Driftless **scales the orders down proportionally** to fully deploy the available cash. Any leftover fractional cash is reported as `leftover_cash`.
 
-Bez sprzedaży **nie da się idealnie trafić w target**, gdy coś jest overweight — narzędzie tego nie ukrywa, tylko pokazuje drift i kupuje to, co da się naprawić gotówką.
+Since no selling occurs, **overweight assets cannot be adjusted**. Driftless accepts this reality, shows the drift, and directs 100% of available cash to the most underweight assets to reduce overall tracking error.
 
-### Przykładowy wynik
+---
+
+## Example Output
 
 ```
 Driftless — plan as of 2026-06-03
 Total portfolio: 80,000 PLN  (positions: 75,000 + cash: 5,000)
 
-ISIN           Label   Current   Target   Drift     Buy (PLN)
-IE00BK5BQT80   VWCE    56.25%    60.00%   +3.75pp   3,000.00
-IE00B4L5Y983   IWDA    37.50%    40.00%   +2.50pp   2,000.00
+┏━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
+┃ ISIN         ┃ Label ┃ Current ┃ Target ┃   Drift ┃ Buy (PLN) ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
+│ IE00BK5BQT80 │ VWCE  │  56.25% │ 60.00% │ +3.75pp │  3,000.00 │
+│ IE00B4L5Y983 │ IWDA  │  37.50% │ 40.00% │ +2.50pp │  2,000.00 │
+└──────────────┴───────┴─────────┴────────┴─────────┴───────────┘
 
 Cash deployed: 5,000.00 PLN
 Leftover cash: 0.00 PLN
 ```
 
-### Czego Driftless nie robi
+---
 
-- Podatku (PIT, FIFO, koszt nabycia)
-- Zleceń sprzedaży ani tax-loss harvesting
-- Importu z brokera / API
-- Pobierania cen z rynku
-- Rekomendacji inwestycyjnych
+## What Driftless does NOT do
 
-To narzędzie do **arytmetyki portfela**, nie doradztwa.
+* **Tax calculations** (no capital gains, PIT-38, FIFO, or tax-loss harvesting logic).
+* **Automatic broker imports** or API execution (no read/write keys required).
+* **Live market pricing** (you provide the snapshot, keeping your data private).
+* **Investment advice**.
 
-### Roadmap
-
-- [ ] `--deploy` — nadpisanie kwoty cash do rozłożenia
-- [ ] Helper NBP: `value_eur` → `value_pln`
-- [ ] Import CSV z brokera
-- [ ] `driftless init` — szablon pliku
+This is purely a mathematical utility tool to assist your regular portfolio management.
 
 ---
 
-## English
+## Roadmap
 
-### What it does
-
-You hold a UCITS ETF basket, a target allocation, and cash on account (or a fresh deposit). Manually splitting “how much VWCE vs IWDA” each time is tedious; selling overweight legs is often off the table.
-
-**Driftless** reads one JSON snapshot and returns **specific PLN buy amounts per ISIN** to reduce allocation drift — buy-only, no sell orders.
-
-### Install & run
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e .
-driftless plan examples/portfolio.example.json
-driftless validate examples/portfolio.example.json
-driftless plan portfolio.json --json
-```
-
-See the Polish section above for the full JSON schema, algorithm, and example table output.
-
-### Design choices
-
-| Choice | Why |
-|---|---|
-| ISIN as key | Unambiguous for UCITS across exchanges |
-| PLN base in v1 | Matches typical PL broker workflow; you supply converted values |
-| Full snapshot | Positions + all free cash = correct `total` for drift math |
-| Buy-only | Matches recurring contribution / DCA without triggering sells |
+- [ ] `--deploy N` — Override available cash for a specific transaction without altering the snapshot.
+- [ ] NBP FX Helper — Add a subcommand to convert foreign-currency values (EUR, USD) to PLN using official NBP exchange rates.
+- [ ] Broker CSV Adapters — Simple parsers to bootstrap or update portfolio values from popular Polish/EU broker CSV exports.
+- [ ] Stand-alone Binaries — Release single-file executables via PyInstaller.
 
 ---
 
 ## Development
+
+All tests run completely offline and require no network connectivity.
 
 ```bash
 pip install -e ".[dev]"
@@ -192,21 +185,21 @@ pytest -v
 python -m driftless plan examples/portfolio.example.json
 ```
 
-Layout:
+### Directory Structure
 
 ```
-src/driftless/          CLI, loader, engine, formatters
+src/driftless/          CLI implementation, loader, engine, and formatters
 src/driftless/schemas/  JSON Schema (bundled with the package)
-tests/                  pytest (no network)
-examples/               Sample portfolio JSON
+tests/                  pytest test suite
+examples/               Sample portfolio JSON files
 ```
 
 ---
 
 ## Disclaimer
 
-This software is provided for **personal portfolio arithmetic** only. It is not financial, legal, or tax advice. You are responsible for your own investment decisions and compliance with local regulations.
+This software is provided for personal financial arithmetic only. It is not investment advice, legal advice, or tax advice. You are solely responsible for your investment decisions and compliance with local laws and tax regulations.
 
 ## License
 
-MIT — see [LICENSE](LICENSE) if present, otherwise MIT as stated in `pyproject.toml`.
+MIT — See [LICENSE](LICENSE) for the full text.
