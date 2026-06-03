@@ -57,6 +57,29 @@ If using a terminal is a barrier, consider these simpler deployment options:
   ```
 * **Stand-alone Executable** *(Planned)* — A single binary executable (via PyInstaller) that runs without Python installed at all.
 
+### Advanced: Multi-Currency Portfolios & Live NBP FX Conversion
+
+For Polish investors, UCITS positions are often displayed in foreign currencies (like `EUR` or `USD`). Driftless supports **on-the-fly currency conversion using the official Narodowy Bank Polski (NBP) API** with zero external dependencies.
+
+To use multi-currency assets, simply replace `value_pln` with `value` and `currency` in your `portfolio.json`:
+
+```json
+{
+  "base_currency": "PLN",
+  "cash_pln": 5000,
+  "positions": [
+    { "isin": "IE00BK5BQT80", "value": 10500, "currency": "EUR", "label": "VWCE" },
+    { "isin": "IE00B4L5Y983", "value_pln": 30000, "label": "IWDA" }
+  ],
+  "target": [
+    { "isin": "IE00BK5BQT80", "weight": 0.60 },
+    { "isin": "IE00B4L5Y983", "weight": 0.40 }
+  ]
+}
+```
+
+When you run `driftless plan`, any asset specified with a foreign currency (e.g. `EUR`, `USD`, `GBP`, `CHF`) will have its latest mid exchange rate fetched from NBP's public API and automatically converted to PLN before executing the rebalancing logic.
+
 ---
 
 ## Commands
@@ -65,8 +88,10 @@ If using a terminal is a barrier, consider these simpler deployment options:
 |---|---|
 | `driftless init [file]` | Creates a ready-to-edit `portfolio.json` (defaults to the current directory) |
 | `driftless plan <file.json>` | Calculates the purchase plan and prints a formatted terminal table |
+| `driftless plan <file.json> --deploy <PLN>` | Overrides the file's available cash balance to plan a custom transaction size |
 | `driftless plan <file.json> --json` | Outputs the plan as machine-readable JSON (useful for scripts/logging) |
 | `driftless validate <file.json>` | Performs schema and business rule validation only |
+| `driftless fx [currencies...]` | Fetches the latest official mid exchange rates from NBP (defaults to EUR, USD, CHF, GBP) |
 
 ### Exit Codes
 * `0` — Success / OK

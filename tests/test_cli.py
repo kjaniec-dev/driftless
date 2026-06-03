@@ -1,5 +1,7 @@
 from pathlib import Path
+from unittest.mock import patch
 
+import pytest
 from typer.testing import CliRunner
 
 from driftless.cli import app
@@ -58,3 +60,60 @@ def test_init_refuses_overwrite(tmp_path):
     result = runner.invoke(app, ["init", str(target)])
     assert result.exit_code == 2
     assert "already exists" in result.output
+
+
+def test_plan_with_deploy_override():
+    # deploy 10,000 PLN instead of the default 5,000 PLN in FIXTURE
+    result = runner.invoke(app, ["plan", str(FIXTURE), "--deploy", "10000"])
+    assert result.exit_code == 0
+    assert "Total portfolio: 85,000 PLN" in result.stdout
+    assert "Cash deployed: 10,000.00 PLN" in result.stdout
+
+
+def test_plan_with_invalid_deploy_override():
+    result = runner.invoke(app, ["plan", str(FIXTURE), "--deploy", "-100"])
+    assert result.exit_code == 2
+    assert "non-negative" in result.output
+
+
+@patch("driftless.loader.fetch_nbp_rate")
+def test_plan_with_multi_currency_positions(mock_fetch, tmp_path):
+    # Mock NBP rate of 4.30 for EUR
+    mock_fetch.return_value = 4.30
+
+    multi = tmp_path / "multi.json"
+    multi.write_text(
+        '{"base_currency":"PLN","cash_pln":1000,"as_of":"2026-06-03",'
+        '"positions":[{"isin":"IE00BK5BQT80","value":1000,"currency":"EUR","label":"VWCE"}],'
+        '"target":[{"isin":"IE00BK5BQT80","weight":1.0}]}',
+        encoding="utf-8",
+    )
+
+    # 1000 EUR * 4.30 = 4300 PLN + 1000 cash = 5300 PLN total portfolio value
+    result = runner.invoke(app, ["plan", str(multi)])
+    assert result.exit_code == 0
+    assert "Total portfolio: 5,300 PLN" in result.stdout
+    assert "positions: 4,300" in result.stdout
+    mock_fetch.assert_called_once_with("EUR")
+
+
+@patch("driftless.cli.fetch_nbp_rate")
+def test_fx_command(mock_fetch):
+    mock_fetch.return_value = 4.25
+
+    result = runner.invoke(app, ["fx", "EUR"])
+    assert result.exit_code == 0
+    assert "EUR: 4.2500 PLN" in result.output
+    mock_fetch.assert_called_once_with("EUR")
+
+
+@patch("driftless.cli.fetch_nbp_rate")
+def test_fx_command_default_list(mock_fetch):
+    mock_fetch.side_effect = lambda c: {"EUR": 4.30, "USD": 4.00, "CHF": 4.50, "GBP": 5.10}[c]
+
+    result = runner.invoke(app, ["fx"])
+    assert result.exit_code == 0
+    assert "EUR: 4.3000 PLN" in result.output
+    assert "USD: 4.0000 PLN" in result.output
+    assert "CHF: 4.5000 PLN" in result.output
+    assert "GBP: 5.1000 PLN" in result.output

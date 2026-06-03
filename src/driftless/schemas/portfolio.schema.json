@@ -31,7 +31,11 @@
     "position": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["isin", "value_pln"],
+      "required": ["isin"],
+      "anyOf": [
+        { "required": ["value_pln"] },
+        { "required": ["value", "currency"] }
+      ],
       "properties": {
         "isin": {
           "type": "string",
@@ -40,6 +44,14 @@
         "value_pln": {
           "type": "number",
           "minimum": 0
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["PLN", "EUR", "USD", "GBP", "CHF"]
         },
         "label": {
           "type": "string",
