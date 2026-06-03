@@ -57,12 +57,17 @@ def compute_plan(portfolio: Portfolio) -> RebalancePlan:
     )
 
     deployed = sum(o.buy_pln for o in orders)
+    deployed = min(deployed, cash)
+    leftover = cash - deployed
+    if abs(leftover) < 1e-6:
+        leftover = 0.0
+
     return RebalancePlan(
         total_pln=total,
         positions_pln=sum(p.value_pln for p in portfolio.positions),
         cash_pln=cash,
         orders=orders,
         cash_deployed=deployed,
-        leftover_cash=cash - deployed,
+        leftover_cash=leftover,
         warnings=tuple(warnings),
     )

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from driftless.errors import PortfolioValidationError
 from driftless.loader import load_portfolio
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_portfolio.json"
@@ -20,5 +21,5 @@ def test_rejects_weights_not_summing_to_one(tmp_path):
         '{"base_currency":"PLN","cash_pln":0,"positions":[],"target":[{"isin":"IE00BK5BQT80","weight":0.5}]}',
         encoding="utf-8",
     )
-    with pytest.raises(ValueError, match="weight"):
+    with pytest.raises(PortfolioValidationError, match="weight"):
         load_portfolio(bad)

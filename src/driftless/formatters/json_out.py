@@ -5,9 +5,11 @@ from driftless.models import RebalancePlan
 
 def plan_to_dict(plan: RebalancePlan) -> dict:
     return {
-        "total_pln": plan.total_pln,
-        "cash_deployed": plan.cash_deployed,
-        "leftover_cash": plan.leftover_cash,
+        "total_pln": round(plan.total_pln, 2),
+        "positions_pln": round(plan.positions_pln, 2),
+        "cash_pln": round(plan.cash_pln, 2),
+        "cash_deployed": round(plan.cash_deployed, 2),
+        "leftover_cash": round(plan.leftover_cash, 2),
         "warnings": list(plan.warnings),
         "orders": [
             {

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import jsonschema
 
+from driftless.errors import PortfolioFileError, PortfolioValidationError
 from driftless.models import Portfolio, Position, Target
 from driftless.validate import validate_portfolio
 
@@ -11,9 +12,24 @@ SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "portfolio.schem
 
 def load_portfolio(path: Path | str) -> Portfolio:
     path = Path(path)
-    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise PortfolioFileError(f"Portfolio file not found: {path}")
+    except OSError as exc:
+        raise PortfolioFileError(f"Cannot read portfolio file {path}: {exc}")
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise PortfolioValidationError(f"Invalid JSON in {path}: {exc}")
+
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    jsonschema.validate(data, schema)
+    try:
+        jsonschema.validate(data, schema)
+    except jsonschema.ValidationError as exc:
+        location = "/".join(str(part) for part in exc.absolute_path) or "(root)"
+        raise PortfolioValidationError(f"Schema error at {location}: {exc.message}")
 
     portfolio = Portfolio(
         base_currency=data["base_currency"],
@@ -32,5 +48,10 @@ def load_portfolio(path: Path | str) -> Portfolio:
         ),
         as_of=data.get("as_of"),
     )
-    validate_portfolio(portfolio)
+
+    try:
+        validate_portfolio(portfolio)
+    except ValueError as exc:
+        raise PortfolioValidationError(str(exc))
+
     return portfolio

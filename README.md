@@ -44,13 +44,35 @@ pip install -e ".[dev]"
 pytest
 ```
 
+### Dla osoby, która nie zna Pythona
+
+Wymagana jest jednorazowa instalacja Pythona 3.14 i wpisanie kilku komend w terminalu (sekcja „Instalacja” powyżej). Sam plik konfiguracyjny jest już maksymalnie prosty — to jeden czytelny JSON, a `driftless init` generuje gotowy szablon do edycji w zwykłym edytorze tekstu.
+
+Jeśli komfortowe wpisywanie komend w terminalu jest barierą, najwygodniejsze opcje to:
+
+- **pipx** — instalacja jedną komendą bez ręcznego venv: `pipx install driftless`, potem po prostu `driftless plan portfolio.json` z dowolnego katalogu.
+- **gotowy plik wykonywalny** (planowane) — pojedynczy binarny plik (PyInstaller), bez instalowania Pythona; uruchamiany podwójnym kliknięciem / z terminala.
+
+Czego raczej nie da się uprościć bez zmiany charakteru narzędzia: to jest CLI, więc minimum to otwarcie terminala i podanie ścieżki do pliku. GUI/web to osobny, większy projekt.
+
 ### Komendy
 
 | Komenda | Opis |
 |---|---|
+| `driftless init [plik]` | Tworzy gotowy do edycji `portfolio.json` (domyślnie w bieżącym katalogu) |
 | `driftless plan <plik.json>` | Liczy plan kupna i drukuje tabelę |
 | `driftless plan <plik> --json` | Ten sam wynik w JSON (skrypty, notatki) |
 | `driftless validate <plik>` | Tylko walidacja schematu i reguł biznesowych |
+
+Kody wyjścia: `0` = OK, `1` = błąd zawartości pliku (zły JSON / schemat / wagi), `2` = problem z plikiem (brak/nieczytelny) lub złe użycie. Błędy są drukowane jako jedna czytelna linia na `stderr` — bez pythonowego tracebacku.
+
+### Najszybszy start
+
+```bash
+driftless init            # tworzy portfolio.json z przykładem
+# edytuj portfolio.json w dowolnym edytorze
+driftless plan portfolio.json
+```
 
 ### Format pliku portfela
 
