@@ -195,10 +195,10 @@ python -m driftless plan examples/portfolio.example.json
 Layout:
 
 ```
-src/driftless/     CLI, loader, engine, formatters
-schemas/           JSON Schema for portfolio files
-tests/             pytest (no network)
-examples/          Sample portfolio JSON
+src/driftless/          CLI, loader, engine, formatters
+src/driftless/schemas/  JSON Schema (bundled with the package)
+tests/                  pytest (no network)
+examples/               Sample portfolio JSON
 ```
 
 ---

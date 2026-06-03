@@ -1,4 +1,5 @@
 import json
+from importlib.resources import files
 from pathlib import Path
 
 import jsonschema
@@ -7,7 +8,10 @@ from driftless.errors import PortfolioFileError, PortfolioValidationError
 from driftless.models import Portfolio, Position, Target
 from driftless.validate import validate_portfolio
 
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "portfolio.schema.json"
+
+def _load_schema() -> dict:
+    resource = files("driftless").joinpath("schemas/portfolio.schema.json")
+    return json.loads(resource.read_text(encoding="utf-8"))
 
 
 def load_portfolio(path: Path | str) -> Portfolio:
@@ -24,7 +28,7 @@ def load_portfolio(path: Path | str) -> Portfolio:
     except json.JSONDecodeError as exc:
         raise PortfolioValidationError(f"Invalid JSON in {path}: {exc}")
 
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema = _load_schema()
     try:
         jsonschema.validate(data, schema)
     except jsonschema.ValidationError as exc:
