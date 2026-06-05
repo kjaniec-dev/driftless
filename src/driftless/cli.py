@@ -87,6 +87,22 @@ def init(
 
 
 @app.command()
+def tui(
+    file: Path | None = typer.Argument(None, help="Portfolio file to pre-load on startup"),
+) -> None:
+    """Launch the interactive terminal UI."""
+    try:
+        from driftless.tui import DriftlessApp
+    except ImportError:
+        typer.echo(
+            "Error: textual is required for the TUI. Install it with: pip install textual",
+            err=True,
+        )
+        raise typer.Exit(EXIT_USAGE)
+    DriftlessApp(initial_file=str(file) if file else "").run()
+
+
+@app.command()
 def fx(
     currencies: list[str] = typer.Argument(
         None, help="Currencies to fetch (e.g., EUR USD). Defaults to EUR, USD, CHF, GBP."
