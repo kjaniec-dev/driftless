@@ -92,6 +92,20 @@ When you run `driftless plan`, any asset specified with a foreign currency (e.g.
 | `driftless plan <file.json> --json` | Outputs the plan as machine-readable JSON (useful for scripts/logging) |
 | `driftless validate <file.json>` | Performs schema and business rule validation only |
 | `driftless fx [currencies...]` | Fetches the latest official mid exchange rates from NBP (defaults to EUR, USD, CHF, GBP) |
+| `driftless tui [file]` | Launches the interactive terminal UI (pre-loads the file if provided) |
+
+### Interactive TUI
+
+`driftless tui` launches a full-screen interactive terminal UI powered by [Textual](https://textual.textualize.io/). It calls the same rebalancing engine as the CLI — with live inputs, an interactive orders table, and color-coded drift.
+
+![Driftless TUI](docs/tui-screenshot.svg)
+
+**Controls:**
+- Type a file path (or pass it as an argument) and press **Enter** or click **Compute**
+- Optionally override cash to deploy in the second input field
+- **Ctrl+R** — recompute, **q** — quit
+
+---
 
 ### Exit Codes
 * `0` — Success / OK
