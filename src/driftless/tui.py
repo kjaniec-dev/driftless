@@ -113,7 +113,9 @@ class DriftlessApp(App[None]):
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
         table.cursor_type = "row"
-        table.add_columns("ISIN", "Label", "Current", "Target", "Drift", "Buy (PLN)")
+        table.add_columns(
+            "ISIN", "Label", "Current", "Target", "Drift (PLN)", "Drift (pp)", "Buy (PLN)"
+        )
         if self._initial_file:
             self._do_compute()
 
@@ -174,7 +176,13 @@ class DriftlessApp(App[None]):
         table = self.query_one(DataTable)
         table.clear()
         for order in plan.orders:
-            drift = Text(
+            drift_pln = order.target_pln - order.current_pln
+            drift_pln_str = f"{drift_pln:+,.2f}" if abs(drift_pln) > 1e-2 else "0.00"
+            drift_pln_text = Text(
+                drift_pln_str,
+                style="green" if drift_pln >= 0 else "red",
+            )
+            drift_pp = Text(
                 f"{order.drift_pp:+.2f}pp",
                 style="green" if order.drift_pp >= 0 else "red",
             )
@@ -183,7 +191,8 @@ class DriftlessApp(App[None]):
                 order.label or "",
                 f"{order.current_weight * 100:.2f}%",
                 f"{order.target_weight * 100:.2f}%",
-                drift,
+                drift_pln_text,
+                drift_pp,
                 f"{order.buy_pln:,.2f}",
             )
 

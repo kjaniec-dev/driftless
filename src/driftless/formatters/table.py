@@ -21,18 +21,23 @@ def print_plan(portfolio: Portfolio, plan: RebalancePlan) -> None:
     table.add_column("Label")
     table.add_column("Current", justify="right")
     table.add_column("Target", justify="right")
-    table.add_column("Drift", justify="right")
+    table.add_column("Drift (PLN)", justify="right")
+    table.add_column("Drift (pp)", justify="right")
     table.add_column("Buy (PLN)", justify="right")
 
     for order in plan.orders:
         label = order.label or ""
-        drift = f"{order.drift_pp:+.2f}pp"
+        drift_pln = order.target_pln - order.current_pln
+        # Positive means underweight (needs buy), negative means overweight
+        drift_pln_str = f"{drift_pln:+,.2f}" if abs(drift_pln) > 1e-2 else "0.00"
+        drift_pp = f"{order.drift_pp:+.2f}pp"
         table.add_row(
             order.isin,
             label,
             f"{order.current_weight * 100:.2f}%",
             f"{order.target_weight * 100:.2f}%",
-            drift,
+            drift_pln_str,
+            drift_pp,
             f"{order.buy_pln:,.2f}",
         )
 
