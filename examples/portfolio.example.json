@@ -1,21 +1,33 @@
 {
   "base_currency": "PLN",
   "as_of": "2026-06-03",
-  "cash_pln": 5000,
+  "cash_pln": 500,
   "positions": [
     {
-      "isin": "IE00BK5BQT80",
-      "value_pln": 45000,
-      "label": "VWCE"
+      "isin": "IE00B5BMR087",
+      "value_pln": 3400,
+      "label": "SXR8"
     },
     {
-      "isin": "IE00B4L5Y983",
-      "value_pln": 30000,
-      "label": "IWDA"
+      "isin": "IE0006WW1TQ4",
+      "value_pln": 4300,
+      "label": "EXUS"
+    },
+    {
+      "isin": "IE00BKM4GZ66",
+      "value_pln": 1200,
+      "label": "IS3N"
+    },
+    {
+      "isin": "IE00B4ND3602",
+      "value_pln": 1100,
+      "label": "EGLN"
     }
   ],
   "target": [
-    { "isin": "IE00BK5BQT80", "weight": 0.60 },
-    { "isin": "IE00B4L5Y983", "weight": 0.40 }
+    { "isin": "IE00B5BMR087", "weight": 0.30 },
+    { "isin": "IE0006WW1TQ4", "weight": 0.40 },
+    { "isin": "IE00BKM4GZ66", "weight": 0.15 },
+    { "isin": "IE00B4ND3602", "weight": 0.15 }
   ]
 }

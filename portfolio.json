@@ -1,26 +1,26 @@
 {
   "base_currency": "PLN",
   "as_of": "2026-06-11",
-  "cash_pln": 5000.0,
+  "cash_pln": 500.0,
   "positions": [
     {
       "isin": "IE00B5BMR087",
-      "value_pln": 3200.0,
+      "value_pln": 3400.0,
       "label": "SXR8"
     },
     {
       "isin": "IE0006WW1TQ4",
-      "value_pln": 3600.0,
+      "value_pln": 4300.0,
       "label": "EXUS"
     },
     {
       "isin": "IE00BKM4GZ66",
-      "value_pln": 1700.0,
+      "value_pln": 1200.0,
       "label": "IS3N"
     },
     {
       "isin": "IE00B4ND3602",
-      "value_pln": 1500.0,
+      "value_pln": 1100.0,
       "label": "EGLN"
     }
   ],

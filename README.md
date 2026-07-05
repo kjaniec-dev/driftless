@@ -124,14 +124,18 @@ Your portfolio file is a **full snapshot** representing your positions and free 
 {
   "base_currency": "PLN",
   "as_of": "2026-06-03",
-  "cash_pln": 5000,
+  "cash_pln": 500,
   "positions": [
-    { "isin": "IE00BK5BQT80", "value_pln": 45000, "label": "VWCE" },
-    { "isin": "IE00B4L5Y983", "value_pln": 30000, "label": "IWDA" }
+    { "isin": "IE00B5BMR087", "value_pln": 3400, "label": "SXR8" },
+    { "isin": "IE0006WW1TQ4", "value_pln": 4300, "label": "EXUS" },
+    { "isin": "IE00BKM4GZ66", "value_pln": 1200, "label": "IS3N" },
+    { "isin": "IE00B4ND3602", "value_pln": 1100, "label": "EGLN" }
   ],
   "target": [
-    { "isin": "IE00BK5BQT80", "weight": 0.60 },
-    { "isin": "IE00B4L5Y983", "weight": 0.40 }
+    { "isin": "IE00B5BMR087", "weight": 0.30 },
+    { "isin": "IE0006WW1TQ4", "weight": 0.40 },
+    { "isin": "IE00BKM4GZ66", "weight": 0.15 },
+    { "isin": "IE00B4ND3602", "weight": 0.15 }
   ]
 }
 ```
@@ -157,19 +161,25 @@ Your portfolio file is a **full snapshot** representing your positions and free 
 
 1. **Calculate Total Assets:**
    ```
+   positions_total = sum(position.value_pln)
    total = sum(position.value_pln) + cash_pln
    ```
-2. **Calculate Target Value per ISIN:**
+2. **Show Current Allocation Drift:**
+   ```
+   current_weight[isin] = current_value[isin] / positions_total
+   drift_pp[isin] = (target_weight[isin] - current_weight[isin]) × 100
+   ```
+3. **Calculate Target Value per ISIN after deploying cash:**
    ```
    target_value[isin] = total × weight
    ```
-3. **Determine Allocation Gap:**
+4. **Determine Allocation Gap:**
    ```
    gap[isin] = target_value[isin] - current_value[isin]
    buy_raw[isin] = max(0, gap[isin])
    ```
-4. **Scale to Available Cash:**  
-   If the sum of all raw buy orders exceeds `cash_pln`, Driftless **scales the orders down proportionally** to fully deploy the available cash. Any leftover fractional cash is reported as `leftover_cash`.
+5. **Allocate Available Cash:**  
+   If the sum of all raw buy orders exceeds `cash_pln`, Driftless spends the cash where it most reduces remaining underweight drift. It buys the most underweight assets until their remaining positive gaps are as even as possible. Any leftover fractional cash is reported as `leftover_cash`.
 
 Since no selling occurs, **overweight assets cannot be adjusted**. Driftless accepts this reality, shows the drift, and directs 100% of available cash to the most underweight assets to reduce overall tracking error.
 
@@ -179,16 +189,19 @@ Since no selling occurs, **overweight assets cannot be adjusted**. Driftless acc
 
 ```
 Driftless — plan as of 2026-06-03
-Total portfolio: 80,000 PLN  (positions: 75,000 + cash: 5,000)
+Total portfolio: 10,500 PLN  (positions: 10,000 + cash: 500)
 
-┏━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
-┃ ISIN         ┃ Label ┃ Current ┃ Target ┃   Drift ┃ Buy (PLN) ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ IE00BK5BQT80 │ VWCE  │  56.25% │ 60.00% │ +3.75pp │  3,000.00 │
-│ IE00B4L5Y983 │ IWDA  │  37.50% │ 40.00% │ +2.50pp │  2,000.00 │
-└──────────────┴───────┴─────────┴────────┴─────────┴───────────┘
+Warning: Buy orders constrained to available cash (500.00 PLN)
+┏━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┓
+┃ ISIN        ┃ Label ┃ Current ┃ Target ┃ Drift (PLN)┃ Drift (pp) ┃ Buy (PLN) ┃
+┡━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━┩
+│ IE00B5BMR087│ SXR8  │  34.00% │ 30.00% │    -250.00 │    -4.00pp │      0.00 │
+│ IE0006WW1TQ4│ EXUS  │  43.00% │ 40.00% │    -100.00 │    -3.00pp │      0.00 │
+│ IE00BKM4GZ66│ IS3N  │  12.00% │ 15.00% │    +375.00 │    +3.00pp │    200.00 │
+│ IE00B4ND3602│ EGLN  │  11.00% │ 15.00% │    +475.00 │    +4.00pp │    300.00 │
+└─────────────┴───────┴─────────┴────────┴────────────┴────────────┴───────────┘
 
-Cash deployed: 5,000.00 PLN
+Cash deployed: 500.00 PLN
 Leftover cash: 0.00 PLN
 ```
 
