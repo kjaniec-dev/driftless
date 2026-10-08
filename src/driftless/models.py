@@ -35,6 +35,8 @@ class BuyOrder:
     target_weight: float
     drift_pp: float
     buy_pln: float
+    after_weight: float
+    drift_after_pp: float
 
 
 @dataclass(frozen=True)

@@ -24,6 +24,8 @@ def print_plan(portfolio: Portfolio, plan: RebalancePlan) -> None:
     table.add_column("Drift (PLN)", justify="right")
     table.add_column("Drift (pp)", justify="right")
     table.add_column("Buy (PLN)", justify="right")
+    table.add_column("After", justify="right")
+    table.add_column("Drift after (pp)", justify="right")
 
     for order in plan.orders:
         label = order.label or ""
@@ -39,6 +41,8 @@ def print_plan(portfolio: Portfolio, plan: RebalancePlan) -> None:
             drift_pln_str,
             drift_pp,
             f"{order.buy_pln:,.2f}",
+            f"{order.after_weight * 100:.2f}%",
+            f"{order.drift_after_pp:+.2f}pp",
         )
 
     console.print(table)

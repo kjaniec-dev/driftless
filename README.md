@@ -179,7 +179,15 @@ Your portfolio file is a **full snapshot** representing your positions and free 
    buy_raw[isin] = max(0, gap[isin])
    ```
 5. **Allocate Available Cash:**  
-   If the sum of all raw buy orders exceeds `cash_pln`, Driftless spends the cash where it most reduces remaining underweight drift. It buys the most underweight assets until their remaining positive gaps are as even as possible. Any leftover fractional cash is reported as `leftover_cash`.
+   If the sum of all raw buy orders exceeds `cash_pln`, Driftless spends the cash where it most reduces remaining underweight drift ("water-filling"): the most underweight assets are bought until their remaining gaps are equal. The water level is computed in closed form, so the result is exact and deterministic. Buy amounts are rounded to 0.01 PLN (largest remainder) and never exceed the available cash; whatever cannot be spent is reported as `leftover_cash`.
+6. **Show the Portfolio After the Purchase:**
+   ```
+   after_weight[isin] = (current_value[isin] + buy[isin]) / (positions_total + cash_deployed)
+   drift_after_pp[isin] = (target_weight[isin] - after_weight[isin]) × 100
+   ```
+   `Drift (PLN)` compares each position with its target value *including* the new cash, while `Drift (pp)` compares invested weights *before* buying. `After` / `Drift after (pp)` show where you end up once the plan is executed.
+
+Positions held but missing from `target` stay in the table with a 0% target (and a warning). They are counted in the portfolio total but are never bought or sold.
 
 Since no selling occurs, **overweight assets cannot be adjusted**. Driftless accepts this reality, shows the drift, and directs 100% of available cash to the most underweight assets to reduce overall tracking error.
 
@@ -192,14 +200,14 @@ Driftless — plan as of 2026-06-03
 Total portfolio: 10,500 PLN  (positions: 10,000 + cash: 500)
 
 Warning: Buy orders constrained to available cash (500.00 PLN)
-┏━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┓
-┃ ISIN        ┃ Label ┃ Current ┃ Target ┃ Drift (PLN)┃ Drift (pp) ┃ Buy (PLN) ┃
-┡━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━┩
-│ IE00B5BMR087│ SXR8  │  34.00% │ 30.00% │    -250.00 │    -4.00pp │      0.00 │
-│ IE0006WW1TQ4│ EXUS  │  43.00% │ 40.00% │    -100.00 │    -3.00pp │      0.00 │
-│ IE00BKM4GZ66│ IS3N  │  12.00% │ 15.00% │    +375.00 │    +3.00pp │    200.00 │
-│ IE00B4ND3602│ EGLN  │  11.00% │ 15.00% │    +475.00 │    +4.00pp │    300.00 │
-└─────────────┴───────┴─────────┴────────┴────────────┴────────────┴───────────┘
+┏━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃ ISIN         ┃ Label ┃ Current ┃ Target ┃ Drift (PLN) ┃ Drift (pp) ┃ Buy (PLN) ┃  After ┃ Drift after (pp) ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ IE00B5BMR087 │ SXR8  │  34.00% │ 30.00% │     -250.00 │    -4.00pp │      0.00 │ 32.38% │          -2.38pp │
+│ IE0006WW1TQ4 │ EXUS  │  43.00% │ 40.00% │     -100.00 │    -3.00pp │      0.00 │ 40.95% │          -0.95pp │
+│ IE00BKM4GZ66 │ IS3N  │  12.00% │ 15.00% │     +375.00 │    +3.00pp │    200.00 │ 13.33% │          +1.67pp │
+│ IE00B4ND3602 │ EGLN  │  11.00% │ 15.00% │     +475.00 │    +4.00pp │    300.00 │ 13.33% │          +1.67pp │
+└──────────────┴───────┴─────────┴────────┴─────────────┴────────────┴───────────┴────────┴──────────────────┘
 
 Cash deployed: 500.00 PLN
 Leftover cash: 0.00 PLN
