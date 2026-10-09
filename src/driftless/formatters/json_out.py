@@ -19,6 +19,8 @@ def plan_to_dict(plan: RebalancePlan) -> dict:
                 "target_weight": o.target_weight,
                 "drift_pp": round(o.drift_pp, 2),
                 "buy_pln": round(o.buy_pln, 2),
+                "after_weight": round(o.after_weight, 6),
+                "drift_after_pp": round(o.drift_after_pp, 2),
             }
             for o in plan.orders
         ],

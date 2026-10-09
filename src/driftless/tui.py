@@ -114,7 +114,8 @@ class DriftlessApp(App[None]):
         table = self.query_one(DataTable)
         table.cursor_type = "row"
         table.add_columns(
-            "ISIN", "Label", "Current", "Target", "Drift (PLN)", "Drift (pp)", "Buy (PLN)"
+            "ISIN", "Label", "Current", "Target", "Drift (PLN)", "Drift (pp)", "Buy (PLN)",
+            "After", "Drift after (pp)",
         )
         if self._initial_file:
             self._do_compute()
@@ -194,6 +195,8 @@ class DriftlessApp(App[None]):
                 drift_pln_text,
                 drift_pp,
                 f"{order.buy_pln:,.2f}",
+                f"{order.after_weight * 100:.2f}%",
+                f"{order.drift_after_pp:+.2f}pp",
             )
 
         self.query_one("#cash-footer", Static).update(

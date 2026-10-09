@@ -19,4 +19,4 @@ def fetch_nbp_rate(currency: str) -> float:
     except URLError as exc:
         raise RuntimeError(
             f"Failed to fetch NBP exchange rate for {currency} (API offline or no network): {exc}"
-        )
+        ) from exc

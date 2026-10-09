@@ -28,7 +28,7 @@ def _resolve_value_pln(p: dict) -> float:
         rate = fetch_nbp_rate(curr)
         return val * rate
     except Exception as exc:
-        raise ValueError(f"Could not convert {val} {curr} to PLN: {exc}")
+        raise ValueError(f"Could not convert {val} {curr} to PLN: {exc}") from exc
 
 
 def load_portfolio(path: Path | str) -> Portfolio:
@@ -36,21 +36,21 @@ def load_portfolio(path: Path | str) -> Portfolio:
     try:
         raw = path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        raise PortfolioFileError(f"Portfolio file not found: {path}")
+        raise PortfolioFileError(f"Portfolio file not found: {path}") from None
     except OSError as exc:
-        raise PortfolioFileError(f"Cannot read portfolio file {path}: {exc}")
+        raise PortfolioFileError(f"Cannot read portfolio file {path}: {exc}") from exc
 
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise PortfolioValidationError(f"Invalid JSON in {path}: {exc}")
+        raise PortfolioValidationError(f"Invalid JSON in {path}: {exc}") from exc
 
     schema = _load_schema()
     try:
         jsonschema.validate(data, schema)
     except jsonschema.ValidationError as exc:
         location = "/".join(str(part) for part in exc.absolute_path) or "(root)"
-        raise PortfolioValidationError(f"Schema error at {location}: {exc.message}")
+        raise PortfolioValidationError(f"Schema error at {location}: {exc.message}") from exc
 
     try:
         positions_tuple = tuple(
@@ -62,7 +62,7 @@ def load_portfolio(path: Path | str) -> Portfolio:
             for p in data["positions"]
         )
     except ValueError as exc:
-        raise PortfolioValidationError(str(exc))
+        raise PortfolioValidationError(str(exc)) from exc
 
     portfolio = Portfolio(
         base_currency=data["base_currency"],
@@ -78,6 +78,6 @@ def load_portfolio(path: Path | str) -> Portfolio:
     try:
         validate_portfolio(portfolio)
     except ValueError as exc:
-        raise PortfolioValidationError(str(exc))
+        raise PortfolioValidationError(str(exc)) from exc
 
     return portfolio
